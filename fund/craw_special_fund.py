@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request, jsonify
 import json
+from loguru import logger
 
 app = Flask(__name__)
 
@@ -43,8 +44,8 @@ def get_special_fund(code,nums,cost):
         nums = float(nums)
         cost = float(cost)
         if len(code) != 6:
-            print('基金代码位数不为6，请核对基金代码')
-            return 0, 0, '基金代码位数不为6，请核对基金代码'
+            logger.error('基金代码位数不为6，请核对基金代码')
+            return 0, 0, '基金代码位数不为6，请核对基金代码', 0 , 0
         url = f'http://fundf10.eastmoney.com/jjjz_'+ str(code)+'.html'
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.71 Safari/537.1 LBBROWSER'
@@ -67,28 +68,32 @@ def get_special_fund(code,nums,cost):
         return code, title_name, predict_val, predict_income, predict_assets
     except Exception as e:
         print('e',e)
-        print('该基金代码不存在或者不能爬取到，请核对代码')
+        logger.error('该基金代码不存在或者不能爬取到，请核对代码')
         return 0, 0, 0,  '该基金代码不存在或者不能爬取到，请核对代码',0
 
 
 @app.route('/get_special_fund',methods=['GET','POST'])
 def get_value():
     # 接收数据
-    original_dir = request.get_json()
-    code = original_dir['code'].strip()
-    nums = original_dir['nums'].strip()
-    cost = original_dir['cost'].strip()
-    fund_code, fund_name, fund_value, predict_income, predict_assets = get_special_fund(code, nums, cost)
-    if fund_code == 0:
-        return fund_value
-    else:
-        final_dir = {}
-        final_dir['fund_code'] = code
-        final_dir['fund_name'] = fund_name
-        final_dir['predict_value'] = fund_value
-        final_dir['predict_income'] = predict_income
-        final_dir['predict_assets'] = predict_assets
-        return jsonify(final_dir)
+    try:
+        original_dir = request.get_json()
+        code = original_dir['code'].strip()
+        nums = original_dir['nums'].strip()
+        cost = original_dir['cost'].strip()
+        fund_code, fund_name, fund_value, predict_income, predict_assets = get_special_fund(code, nums, cost)
+        if fund_code == 0:
+            return jsonify({'error':fund_value})
+        else:
+            final_dir = {}
+            final_dir['fund_code'] = code
+            final_dir['fund_name'] = fund_name
+            final_dir['predict_value'] = fund_value
+            final_dir['predict_income'] = predict_income
+            final_dir['predict_assets'] = predict_assets
+            return jsonify(final_dir)
+    except Exception as e:
+        logger.error('输入参数有误，请核对后再次请求,报错信息:{}'.format(e))
+        return jsonify({'error':'输入参数有误，请核对后再次请求'})
 
 
 
