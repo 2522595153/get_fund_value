@@ -17,13 +17,15 @@ def hello():
     你可以使用post请求访问这个服务，地址:<br>
     http://121.4.78.151:5000/get_special_fund<br>
     传入的数据格式为:<br>
-    {'code':'110011','nums':'100','cost':'8.566'}<br>
+    {'code':'110011', // 基金代码<br>
+    'nums':'100', //持有份额 <br>
+    'cost':'8.566'}<br>
     返回数据格式为:<br>
     {'fund_code': '110011', <br>
     'fund_name': '易方达中小盘混合 ', <br>
     'predict_assets': 74.93, //预测持有收益 <br>
      'predict_income': -23.5905,//预测当日收益 <br>
-     'predict_value': 9.3153}//预测当日收益
+     'predict_value': 9.3153}//预测当日净值
     
     '''
 
